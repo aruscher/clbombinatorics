@@ -59,7 +59,8 @@
   ((sets :initarg :sets :accessor sets)))
 
 (defmethod compute-elements ((p set-product))
-  (n-cartesian-product (sets p)))
+  (n-cartesian-product (loop :for set :in (sets p)
+                            :collect (elements set))))
 
 (defmethod count-elements ((p set-product))
   (reduce #'* (loop :for set :in (sets p)
