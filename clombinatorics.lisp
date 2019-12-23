@@ -1,32 +1,32 @@
-(defpackage #:combinatorix
+(defpackage #:clombinatorix
   (:use #:cl))
 
-(in-package #:combinatorix)
+(in-package #:clombinatorix)
 
 ;; Src: http://www.math.kit.edu/iag6/lehre/co2015s/media/script.pdf
 (declaim (optimize (debug 3)))
 
-(defclass combinatorix ()
+(defclass clombinatorix ()
   ((elements :accessor elements)))
 
-(defgeneric count-elements (combinatorix)
+(defgeneric count-elements (clombinatorix)
   (:documentation "Counts number of elements."))
 
 (defmethod count-elements ((l list))
   (list-length l))
 
-(defgeneric compute-elements (combinatorix)
+(defgeneric compute-elements (clombinatorix)
   (:documentation "Computes the elements."))
 
 (defmethod elements ((l list))
   l)
 
-(defmethod elements :before ((c combinatorix))
+(defmethod elements :before ((c clombinatorix))
   (unless (slot-boundp c 'elements)
     (setf (slot-value c 'elements)
           (compute-elements c))))
 
-(defclass natural-numbers (combinatorix)
+(defclass natural-numbers (clombinatorix)
   ((from :initarg :from :reader from)
    (to :initarg :to :reader to)))
 
@@ -39,7 +39,7 @@
 (defmethod compute-elements ((n natural-numbers))
   (loop :for i :from (from n) :upto (to n) :collect i))
 
-(defclass set-partition (combinatorix)
+(defclass set-partition (clombinatorix)
   ((sets :initarg :sets :accessor sets)))
 
 (defmethod compute-elements ((p set-partition))
@@ -55,7 +55,7 @@
   (make-instance '%set-partition :sets sets))
 
 
-(defclass set-product (combinatorix)
+(defclass set-product (clombinatorix)
   ((sets :initarg :sets :accessor sets)))
 
 (defmethod compute-elements ((p set-product))
