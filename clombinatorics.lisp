@@ -1,5 +1,8 @@
 (defpackage #:clombinatorix
-  (:use #:cl))
+  (:use #:cl)
+  (:import-from #:alexandria
+                :copy-array
+                :nconcf))
 
 (in-package #:clombinatorix)
 
@@ -28,16 +31,16 @@
 
 (defclass natural-numbers (clombinatorix)
   ((from :initarg :from :reader from)
-   (to :initarg :to :reader to)))
+   (upto :initarg :upto :reader upto)))
 
-(defun natural-numbers (&key from to)
-  (make-instance 'natural-numbers :from from :to to))
+(defun natural-numbers (from upto)
+  (make-instance 'natural-numbers :from from :upto upto))
 
 (defmethod count-elements ((n natural-numbers))
-  (+ (- (to n) (from n)) 1))
+  (+ (- (upto n) (from n)) 1))
 
 (defmethod compute-elements ((n natural-numbers))
-  (loop :for i :from (from n) :upto (to n) :collect i))
+  (loop :for i :from (from n) :upto (upto n) :collect i))
 
 (defclass set-partition (clombinatorix)
   ((sets :initarg :sets :accessor sets)))
@@ -76,9 +79,47 @@
             nconc (loop for y in (n-cartesian-product (cdr l))  
                         collect (cons x y)))))
 
+; Permutation with repetition; permutation wihtout repetition; k out of n
+(defclass permutation (clombinatorix)
+  ((set :initarg :set :reader pset)
+   (check :initarg :repetition-check :reader repetition-check)))
+
+(defun permutation (set &optional (repetition-check nil))
+  (make-instance 'permutation
+                 :set set
+                 :repetition-check repetition-check))
+
+(defmethod count-elements ((p permutation))
+  (factorial (count-elements (pset p))))
+
+(defmethod compute-elements ((p permutation))
+  (let* ((elements (elements (pset p)))
+         (array (coerce elements 'vector))
+         (n (length elements)))
+    (heaps-algorithm n array )))
 
 
+(defun heaps-algorithm (n array)
+  (let ((result nil))
+    (if (= n 1)
+        (list (copy-array array))
+        (progn
+          (dotimes (i n result)
+                  (append (heaps-algorithm (- n 1) array) result)
+                  (if (evenp n)
+                      (swap i (- n 1) array)
+                      (swap 0 (- n 1) array)))))))
+
+(defun factorial (n)
+  (reduce #'* (loop :for i :from 2 :upto n :collect i)))
+
+(defun swap (what with array)
+  (rotatef (aref array what)
+           (aref array with)))
 
 (defparameter *foo*
-  (set-product (natural-numbers :from 1 :to 9)
-                      (natural-numbers :from 10 :to 20)))
+  (set-product (natural-numbers 1 9)
+                      (natural-numbers 10 20)))
+
+(defparameter *foo-permut*
+  (permutation (natural-numbers 1 3)))
