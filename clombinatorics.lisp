@@ -2,11 +2,12 @@
   (:use #:cl)
   (:import-from #:alexandria
                 :copy-array
-                :nconcf))
+                :appendf))
 
 (in-package #:clombinatorix)
 
 ;; Src: http://www.math.kit.edu/iag6/lehre/co2015s/media/script.pdf
+;; https://www.math.ust.hk/~mabfchen/Math3343/Generating-Permutations.pdf
 (declaim (optimize (debug 3)))
 
 (defclass clombinatorix ()
@@ -98,14 +99,13 @@
          (n (length elements)))
     (heaps-algorithm n array )))
 
-
 (defun heaps-algorithm (n array)
   (let ((result nil))
     (if (= n 1)
-        (list (copy-array array))
+        (list (coerce (copy-array array) 'list))
         (progn
           (dotimes (i n result)
-                  (append (heaps-algorithm (- n 1) array) result)
+                  (appendf result (heaps-algorithm (- n 1) array))
                   (if (evenp n)
                       (swap i (- n 1) array)
                       (swap 0 (- n 1) array)))))))
